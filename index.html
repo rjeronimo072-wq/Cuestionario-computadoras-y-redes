@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evaluación de Hardware y Redes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --primary-dark: #1d4ed8;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --border: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e5e7eb 0, #d1d5db 35%, #9ca3af 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      color: var(--text-main);
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1100px;
+      background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    header {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    header h1 {
+      font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-header {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 650px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .helper-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .field {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    input[type="text"] {
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s ease-out;
+      background: #f9fafb;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+      background: #ffffff;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.45);
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s ease-out, opacity 0.15s ease-out;
+    }
+
+    .btn span.icon {
+      font-size: 1rem;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.55);
+      background: var(--primary-dark);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary-dark);
+      border: 1px solid var(--primary);
+      box-shadow: none;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: var(--primary-soft);
+    }
+
+    .info-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    .info-chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px dashed var(--border);
+      background: #f9fafb;
+      color: var(--text-muted);
+    }
+
+    /* Bloque de tips */
+
+    .tips {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      padding: 8px 10px;
+      background: #f9fafb;
+    }
+
+    .tips ul {
+      padding-left: 16px;
+      margin-top: 4px;
+    }
+
+    .tips li {
+      margin-bottom: 2px;
+    }
+
+    /* Panel del cuestionario */
+
+    .quiz-header {
+      margin-bottom: 10px;
+    }
+
+    .quiz-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #22c55e, #2563eb);
+      transition: width 0.2s ease-out;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .options {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      cursor: pointer;
+      transition: background 0.15s ease-out, border 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
+      font-size: 0.9rem;
+    }
+
+    .option:hover {
+      background: #eff6ff;
+      border-color: rgba(37, 99, 235, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(148, 163, 184, 0.5);
+    }
+
+    .option input {
+      margin-top: 3px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .option-label {
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+    }
+
+    .option-letter {
+      font-weight: 600;
+      color: var(--primary-dark);
+      min-width: 16px;
+    }
+
+    .quiz-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Resultados */
+
+    .results-summary {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .result-tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+
+    .dot.success {
+      background: var(--success);
+    }
+
+    .dot.error {
+      background: var(--danger);
+    }
+
+    .score-big {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .answers-list {
+      margin-top: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+      font-size: 0.82rem;
+    }
+
+    .answers-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .answers-list::-webkit-scrollbar-track {
+      background: #f3f4f6;
+      border-radius: 999px;
+    }
+    .answers-list::-webkit-scrollbar-thumb {
+      background: #cbd5f5;
+      border-radius: 999px;
+    }
+
+    .answer-item {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #f9fafb;
+      margin-bottom: 6px;
+    }
+
+    .answer-item.correct {
+      border-color: rgba(22, 163, 74, 0.7);
+      background: #ecfdf3;
+    }
+
+    .answer-item.incorrect {
+      border-color: rgba(220, 38, 38, 0.7);
+      background: #fef2f2;
+    }
+
+    .answer-item h4 {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .answer-item p {
+      margin-bottom: 2px;
+      color: var(--text-muted);
+    }
+
+    footer {
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>
+        Evaluación de Hardware y Redes
+        <span class="badge-header">Versión A · 20 ítems</span>
+      </h1>
+      <p>
+        Escribe tu nombre, pulsa <strong>Iniciar</strong> y responde 20 preguntas de opción múltiple
+        sobre componentes de hardware, dispositivos de red y conceptos básicos de conectividad.
+      </p>
+    </header>
+
+    <main>
+      <!-- Panel izquierdo: datos del estudiante -->
+      <section class="panel">
+        <h2>Datos del estudiante</h2>
+        <p class="helper-text">
+          El cuestionario no comenzará hasta que registres tu nombre. Esto aparecerá en el encabezado de la prueba.
+        </p>
+
+        <div class="field">
+          <label for="studentName">Nombre y apellidos</label>
+          <input type="text" id="studentName" placeholder="Ej: Ana María López" />
+        </div>
+
+        <button id="btnStart" class="btn" disabled>
+          <span class="icon">▶️</span>
+          Iniciar cuestionario
+        </button>
+
+        <div class="info-chip-row">
+          <div class="info-chip">🧩 20 preguntas por intento</div>
+          <div class="info-chip">🔁 Se seleccionan de forma aleatoria</div>
+          <div class="info-chip">💻 Temas: hardware y redes</div>
+        </div>
+
+        <div class="tips">
+          <strong>Recomendaciones:</strong>
+          <ul>
+            <li>Lee cada enunciado con calma antes de marcar la opción.</li>
+            <li>Piensa en qué hace físicamente cada dispositivo de red.</li>
+            <li>Relaciona cada componente de hardware con su función principal.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Panel derecho: cuestionario y resultados -->
+      <section class="panel">
+        <!-- Contenedor del cuestionario -->
+        <div id="quizPanel">
+          <div class="quiz-header">
+            <div class="quiz-top">
+              <div id="lblStudent" class="pill">Estudiante: —</div>
+              <div id="lblCounter" class="pill">Pregunta 0 / 20</div>
+            </div>
+            <div class="progress">
+              <div id="progressBar" class="progress-inner"></div>
+            </div>
+          </div>
+
+          <div id="questionBlock">
+            <p id="questionText" class="question-text">
+              Escribe tu nombre a la izquierda y pulsa “Iniciar cuestionario” para comenzar.
+            </p>
+            <ul id="optionsList" class="options"></ul>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="btnNext" class="btn" disabled>
+              <span class="icon">➡️</span>
+              Siguiente
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenedor de resultados -->
+        <div id="resultsPanel" class="hidden">
+          <h2>Resultados de la evaluación</h2>
+          <p class="helper-text" id="resultsHeading"></p>
+
+          <div class="results-summary">
+            <div class="result-tag">
+              <span class="dot success"></span>
+              <span id="lblCorrect">0 correctas</span>
+            </div>
+            <div class="result-tag">
+              <span class="dot error"></span>
+              <span id="lblIncorrect">0 incorrectas</span>
+            </div>
+            <div class="result-tag">
+              🧮 <span id="lblScore" class="score-big">0%</span>
+            </div>
+          </div>
+
+          <h3 style="margin-top:8px;font-size:0.95rem;">Revisión pregunta por pregunta</h3>
+          <div id="answersReview" class="answers-list"></div>
+
+          <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
+            <button id="btnRetry" class="btn">
+              <span class="icon">🔄</span>
+              Volver a presentar con nuevas preguntas
+            </button>
+            <button id="btnBackToStart" class="btn btn-outline">
+              <span class="icon">⬅️</span>
+              Cambiar nombre y reiniciar
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Contenido: Fundamentos de hardware y redes de computadoras.</span>
+      <span>Diseño responsivo · Compatible con móviles, tablets y PC.</span>
+    </footer>
+  </div>
+
+  <script>
+    // ================================
+    // Banco de preguntas
+    // ================================
+    const questionPool = [
+      {
+        question: "¿Cuál de los siguientes componentes almacena de forma permanente el sistema operativo y los archivos del usuario?",
+        options: [
+          "a) Memoria RAM",
+          "b) Memoria caché",
+          "c) Disco duro o unidad SSD",
+          "d) Tarjeta de video",
+          "e) Fuente de poder"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Qué componente se considera el \"cerebro\" del computador porque ejecuta instrucciones y coordina las operaciones?",
+        options: [
+          "a) GPU",
+          "b) CPU",
+          "c) BIOS",
+          "d) Chipset",
+          "e) Memoria ROM"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "La memoria RAM se caracteriza principalmente por ser:",
+        options: [
+          "a) Memoria permanente de solo lectura",
+          "b) Memoria volátil de acceso aleatorio",
+          "c) Memoria magnética de gran capacidad",
+          "d) Memoria óptica extraíble",
+          "e) Memoria gráfica dedicada"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "¿Cuál de los siguientes es un ejemplo de periférico de entrada?",
+        options: [
+          "a) Impresora láser",
+          "b) Monitor LCD",
+          "c) Bocinas",
+          "d) Teclado",
+          "e) Proyector"
+        ],
+        answerIndex: 3
+      },
+      {
+        question: "¿Qué dispositivo de red se utiliza para conectar varios equipos dentro de una misma red local (LAN) y segmentar el tráfico hacia los puertos destino?",
+        options: [
+          "a) Repetidor",
+          "b) Hub",
+          "c) Switch",
+          "d) Bridge",
+          "e) Firewall"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "Una dirección IP tiene como función principal:",
+        options: [
+          "a) Identificar físicamente un puerto de switch",
+          "b) Identificar el sistema operativo del equipo",
+          "c) Identificar de forma lógica un dispositivo dentro de una red",
+          "d) Determinar la velocidad de conexión",
+          "e) Servir como contraseña de acceso a la red"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Qué tipo de medio de transmisión utiliza cables de cobre trenzados para transportar la señal?",
+        options: [
+          "a) Fibra óptica",
+          "b) Cable coaxial",
+          "c) Par trenzado (UTP/STP)",
+          "d) Microondas",
+          "e) Infrarrojo"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "En el modelo OSI, ¿en qué capa se sitúan normalmente los switches Ethernet tradicionales (capa 2)?",
+        options: [
+          "a) Capa de transporte",
+          "b) Capa de red",
+          "c) Capa de aplicación",
+          "d) Capa de enlace de datos",
+          "e) Capa física"
+        ],
+        answerIndex: 3
+      },
+      {
+        question: "¿Cuál de las siguientes afirmaciones describe mejor una red LAN?",
+        options: [
+          "a) Red de área amplia que abarca varios países",
+          "b) Red de área personal entre un solo usuario y sus dispositivos",
+          "c) Red que conecta computadoras dentro de una misma área limitada, como un edificio",
+          "d) Red dedicada exclusivamente a redes inalámbricas satelitales",
+          "e) Red que solo permite conexión a impresoras"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "Un router doméstico típico cumple principalmente la función de:",
+        options: [
+          "a) Convertir señal digital a analógica para impresoras",
+          "b) Conectar redes diferentes y enrutar paquetes entre ellas",
+          "c) Ampliar la memoria RAM del sistema",
+          "d) Acelerar el procesador del computador",
+          "e) Sustituir a la tarjeta de video"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "¿Cuál de estos dispositivos ayuda a proteger una red frente a accesos no autorizados desde el exterior?",
+        options: [
+          "a) Repetidor de señal",
+          "b) Servidor DNS",
+          "c) Firewall",
+          "d) Switch no gestionable",
+          "e) Punto de acceso (AP)"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Qué componente suministra la energía eléctrica estable y adecuada a todos los dispositivos del PC?",
+        options: [
+          "a) Fuente de poder (PSU)",
+          "b) Placa base",
+          "c) Ventilador del gabinete",
+          "d) Disco duro",
+          "e) Módem"
+        ],
+        answerIndex: 0
+      },
+      {
+        question: "La sigla \"NIC\" en el contexto de redes hace referencia a:",
+        options: [
+          "a) Network Interface Card",
+          "b) Network Internal Connector",
+          "c) New Internet Channel",
+          "d) Node Interconnection Cable",
+          "e) Network IP Controller"
+        ],
+        answerIndex: 0
+      },
+      {
+        question: "¿Cuál es la principal diferencia entre un SSD y un disco duro (HDD)?",
+        options: [
+          "a) El HDD solo se usa en servidores",
+          "b) El SSD es más rápido y no tiene partes mecánicas",
+          "c) El SSD solo almacena el sistema operativo",
+          "d) El HDD siempre ocupa menos espacio físico",
+          "e) El HDD no puede funcionar con sistemas modernos"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "En una topología de red en estrella:",
+        options: [
+          "a) Todos los nodos se conectan en un anillo cerrado",
+          "b) Cada nodo solo se conecta con dos vecinos",
+          "c) Todos los nodos dependen de un nodo central",
+          "d) No existe ningún punto central de conexión",
+          "e) Todos los nodos se conectan mediante enlaces inalámbricos"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Cuál de los siguientes dispositivos se utiliza para ampliar el alcance de una señal, pero sin procesar el tráfico de forma inteligente?",
+        options: [
+          "a) Router",
+          "b) Switch",
+          "c) Repetidor",
+          "d) Firewall",
+          "e) Proxy"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "El protocolo HTTP/HTTPS se utiliza principalmente para:",
+        options: [
+          "a) Transferencia de archivos por lotes",
+          "b) Navegación web y acceso a páginas",
+          "c) Envío de correos electrónicos",
+          "d) Administración remota de equipos",
+          "e) Sincronización de relojes en red"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "¿Cuál de los siguientes es un ejemplo de periférico de salida?",
+        options: [
+          "a) Mouse",
+          "b) Escáner",
+          "c) Micrófono",
+          "d) Monitor",
+          "e) Teclado numérico"
+        ],
+        answerIndex: 3
+      },
+      {
+        question: "La memoria ROM se caracteriza por:",
+        options: [
+          "a) Ser volátil y rápida",
+          "b) Perder su contenido al apagar el equipo",
+          "c) Ser una memoria de solo lectura con información permanente",
+          "d) Almacenar los archivos de usuario de forma temporal",
+          "e) Ser utilizada únicamente por la tarjeta de video"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "Una red inalámbrica Wi-Fi de uso doméstico se basa normalmente en el estándar:",
+        options: [
+          "a) IEEE 802.3",
+          "b) IEEE 1394",
+          "c) IEEE 802.11",
+          "d) IEEE 802.5",
+          "e) IEEE 754"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Qué tipo de dirección se asocia físicamente a la tarjeta de red de un dispositivo?",
+        options: [
+          "a) Dirección IP pública",
+          "b) Dirección de subred",
+          "c) Dirección MAC",
+          "d) Dirección DNS",
+          "e) Dirección de gateway"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "En una red, el dispositivo que traduce nombres de dominio (como www.ejemplo.com) a direcciones IP se denomina:",
+        options: [
+          "a) Servidor DHCP",
+          "b) Servidor FTP",
+          "c) Servidor DNS",
+          "d) Servidor SMTP",
+          "e) Servidor HTTP"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Cuál de las siguientes opciones describe mejor la función de la placa base (motherboard)?",
+        options: [
+          "a) Proporcionar energía redundante al sistema",
+          "b) Conectar y comunicar todos los componentes del computador",
+          "c) Actuar como memoria temporal de respaldo",
+          "d) Encriptar todo el tráfico de red",
+          "e) Aumentar el rendimiento gráfico"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "¿Cuál es la principal función del servidor DHCP en una red?",
+        options: [
+          "a) Enviar correos electrónicos",
+          "b) Asignar direcciones IP de forma automática",
+          "c) Almacenar archivos compartidos",
+          "d) Controlar el acceso inalámbrico",
+          "e) Gestionar copias de seguridad"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "¿Qué afirmación sobre una red WAN es correcta?",
+        options: [
+          "a) Siempre es propiedad de un solo usuario",
+          "b) Solo conecta dispositivos dentro de un aula",
+          "c) Puede abarcar grandes distancias, incluso países o continentes",
+          "d) Se limita a conexiones mediante Bluetooth",
+          "e) No puede utilizar enlaces de fibra óptica"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Cuál de los siguientes componentes está especializado en el procesamiento de gráficos e imágenes?",
+        options: [
+          "a) CPU",
+          "b) GPU o tarjeta de video",
+          "c) Fuente de poder",
+          "d) NIC",
+          "e) BIOS"
+        ],
+        answerIndex: 1
+      },
+      {
+        question: "En una red de computadoras, el término \"ancho de banda\" se refiere a:",
+        options: [
+          "a) La cantidad máxima de usuarios permitidos",
+          "b) La distancia máxima entre dos nodos",
+          "c) La capacidad de transmisión de datos en un periodo de tiempo",
+          "d) El tamaño físico del cable",
+          "e) El número de dispositivos conectados al switch"
+        ],
+        answerIndex: 2
+      },
+      {
+        question: "¿Qué tipo de dispositivo permite conectar equipos de distintos segmentos de red y tomar decisiones de enrutamiento?",
+        options: [
+          "a) Switch capa 2",
+          "b) Router",
+          "c) Repetidor",
+          "d) AP pasivo",
+          "e) Módem analógico"
+        ],
+        answerIndex: 1
+      }
+    ];
+
+    // ================================
+    // Estado del cuestionario
+    // ================================
+    let selectedQuestions = [];
+    let currentIndex = 0;
+    let studentName = "";
+    let answersLog = []; // {question, options, chosenIndex, correctIndex}
+
+    const TOTAL_QUESTIONS = 20;
+
+    // ================================
+    // Referencias al DOM
+    // ================================
+    const studentNameInput = document.getElementById("studentName");
+    const btnStart = document.getElementById("btnStart");
+    const lblStudent = document.getElementById("lblStudent");
+    const lblCounter = document.getElementById("lblCounter");
+    const progressBar = document.getElementById("progressBar");
+    const questionText = document.getElementById("questionText");
+    const optionsList = document.getElementById("optionsList");
+    const btnNext = document.getElementById("btnNext");
+
+    const quizPanel = document.getElementById("quizPanel");
+    const resultsPanel = document.getElementById("resultsPanel");
+    const resultsHeading = document.getElementById("resultsHeading");
+    const lblCorrect = document.getElementById("lblCorrect");
+    const lblIncorrect = document.getElementById("lblIncorrect");
+    const lblScore = document.getElementById("lblScore");
+    const answersReview = document.getElementById("answersReview");
+    const btnRetry = document.getElementById("btnRetry");
+    const btnBackToStart = document.getElementById("btnBackToStart");
+
+    // ================================
+    // Utilidades
+    // ================================
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function selectRandomQuestions(count) {
+      const shuffled = shuffleArray(questionPool);
+      return shuffled.slice(0, count);
+    }
+
+    // ================================
+    // Lógica del cuestionario
+    // ================================
+    function startQuiz() {
+      studentName = studentNameInput.value.trim();
+      if (!studentName) return;
+
+      selectedQuestions = selectRandomQuestions(TOTAL_QUESTIONS);
+      currentIndex = 0;
+      answersLog = [];
+
+      lblStudent.textContent = "Estudiante: " + studentName;
+      resultsPanel.classList.add("hidden");
+      quizPanel.classList.remove("hidden");
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = selectedQuestions[currentIndex];
+      const total = selectedQuestions.length;
+
+      lblCounter.textContent = `Pregunta ${currentIndex + 1} / ${total}`;
+      const progressPercent = (currentIndex / total) * 100;
+      progressBar.style.width = progressPercent + "%";
+
+      questionText.textContent = q.question;
+      optionsList.innerHTML = "";
+      btnNext.disabled = true;
+
+      q.options.forEach((optText, idx) => {
+        const li = document.createElement("li");
+        li.className = "option";
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "opt";
+        input.id = "opt-" + idx;
+        input.value = idx;
+
+        const labelContainer = document.createElement("div");
+        labelContainer.className = "option-label";
+
+        const letterSpan = document.createElement("span");
+        letterSpan.className = "option-letter";
+        // Extraer la letra desde el propio texto (a), b), etc.), o usar charCode
+        letterSpan.textContent = String.fromCharCode(97 + idx) + ")";
+
+        const textSpan = document.createElement("span");
+        // Quitamos el prefijo "a) " del texto original para no duplicar
+        textSpan.textContent = optText.replace(/^[a-e]\)\s*/i, "");
+
+        labelContainer.appendChild(letterSpan);
+        labelContainer.appendChild(textSpan);
+
+        li.appendChild(input);
+        li.appendChild(labelContainer);
+
+        li.addEventListener("click", () => {
+          input.checked = true;
+          btnNext.disabled = false;
+        });
+
+        input.addEventListener("change", () => {
+          btnNext.disabled = false;
+        });
+
+        optionsList.appendChild(li);
+      });
+
+      btnNext.textContent =
+        currentIndex === total - 1 ? "Finalizar cuestionario" : "Siguiente";
+    }
+
+    function handleNext() {
+      const selected = document.querySelector('input[name="opt"]:checked');
+      if (!selected) return;
+
+      const chosenIdx = parseInt(selected.value, 10);
+      const q = selectedQuestions[currentIndex];
+
+      answersLog.push({
+        question: q.question,
+        options: q.options,
+        chosenIndex: chosenIdx,
+        correctIndex: q.answerIndex
+      });
+
+      currentIndex++;
+
+      if (currentIndex < selectedQuestions.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      const total = answersLog.length;
+      const correct = answersLog.filter(
+        (a) => a.chosenIndex === a.correctIndex
+      ).length;
+      const incorrect = total - correct;
+      const score = Math.round((correct / total) * 100);
+
+      quizPanel.classList.add("hidden");
+      resultsPanel.classList.remove("hidden");
+
+      resultsHeading.textContent = `Muy bien, ${studentName}. Aquí puedes revisar tu desempeño en esta evaluación de hardware y redes.`;
+      lblCorrect.textContent = `${correct} correctas`;
+      lblIncorrect.textContent = `${incorrect} incorrectas`;
+      lblScore.textContent = `${score}%`;
+
+      answersReview.innerHTML = "";
+      answersLog.forEach((item, idx) => {
+        const wrapper = document.createElement("div");
+        const isCorrect = item.chosenIndex === item.correctIndex;
+        wrapper.className = "answer-item " + (isCorrect ? "correct" : "incorrect");
+
+        const title = document.createElement("h4");
+        title.textContent = `Pregunta ${idx + 1}`;
+        wrapper.appendChild(title);
+
+        const qText = document.createElement("p");
+        qText.textContent = item.question;
+        wrapper.appendChild(qText);
+
+        const chosenText = document.createElement("p");
+        const chosenLabel =
+          item.chosenIndex >= 0 ? item.options[item.chosenIndex] : "No respondida";
+        chosenText.innerHTML = `<strong>Tu respuesta:</strong> ${chosenLabel}`;
+        wrapper.appendChild(chosenText);
+
+        if (!isCorrect) {
+          const correctText = document.createElement("p");
+          correctText.innerHTML = `<strong>Respuesta correcta:</strong> ${item.options[item.correctIndex]}`;
+          wrapper.appendChild(correctText);
+        }
+
+        answersReview.appendChild(wrapper);
+      });
+
+      progressBar.style.width = "100%";
+      lblCounter.textContent = `Completaste las ${total} preguntas`;
+    }
+
+    function resetToStart(clearName) {
+      if (clearName) {
+        studentNameInput.value = "";
+        btnStart.disabled = true;
+        lblStudent.textContent = "Estudiante: —";
+      }
+      currentIndex = 0;
+      answersLog = [];
+      questionText.textContent =
+        'Escribe tu nombre a la izquierda y pulsa “Iniciar cuestionario” para comenzar.';
+      optionsList.innerHTML = "";
+      lblCounter.textContent = "Pregunta 0 / 20";
+      progressBar.style.width = "0%";
+      resultsPanel.classList.add("hidden");
+      quizPanel.classList.remove("hidden");
+      btnNext.disabled = true;
+    }
+
+    // ================================
+    // Eventos
+    // ================================
+    studentNameInput.addEventListener("input", () => {
+      const value = studentNameInput.value.trim();
+      btnStart.disabled = value.length < 2;
+    });
+
+    btnStart.addEventListener("click", startQuiz);
+    btnNext.addEventListener("click", handleNext);
+    btnRetry.addEventListener("click", () => {
+      // Misma persona, nuevo set de preguntas
+      startQuiz();
+    });
+    btnBackToStart.addEventListener("click", () => {
+      resetToStart(true);
+    });
+  </script>
+</body>
+</html>
